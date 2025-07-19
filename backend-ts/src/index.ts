@@ -5,6 +5,9 @@ const app = express();
 const port = process.env.PORT ?? 8080;
 const database = new EmployeeDatabaseInMemory();
 
+// JSON解析のためのmiddleware
+app.use(express.json());
+
 app.get("/api/employees", async (req: Request, res: Response) => {
     const filterText = req.query.filterText ?? "";
     // req.query is parsed by the qs module.
@@ -25,6 +28,23 @@ app.get("/api/employees", async (req: Request, res: Response) => {
     } catch (e) {
         console.error(`Failed to load the users filtered by ${filterText}.`, e);
         res.status(500).send();
+    }
+});
+
+app.post("/api/employees", async (req: Request, res: Response) => {
+    try {
+        const { name, age } = req.body;
+        
+        if (!name || typeof name !== 'string' || !age || typeof age !== 'number') {
+            res.status(400).send(JSON.stringify({ error: 'name (string) and age (number) are required' }));
+            return;
+        }
+        
+        const newEmployee = await database.createEmployee(name, age);
+        res.status(201).send(JSON.stringify(newEmployee));
+    } catch (error) {
+        console.error('Error creating employee:', error);
+        res.status(400).send(JSON.stringify({ error: 'Invalid request body' }));
     }
 });
 

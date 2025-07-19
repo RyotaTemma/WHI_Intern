@@ -24,6 +24,32 @@ const getEmployeesHandler = async (database: EmployeeDatabase, filterText: strin
     };
 };
 
+const createEmployeeHandler = async (database: EmployeeDatabase, body: string): Promise<LambdaFunctionURLResult> => {
+    try {
+        const requestData = JSON.parse(body);
+        const { name, age } = requestData;
+        
+        if (!name || typeof name !== 'string' || !age || typeof age !== 'number') {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'name (string) and age (number) are required' }),
+            };
+        }
+        
+        const newEmployee = await database.createEmployee(name, age);
+        return {
+            statusCode: 201,
+            body: JSON.stringify(newEmployee),
+        };
+    } catch (error) {
+        console.error('Error creating employee:', error);
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'Invalid request body' }),
+        };
+    }
+};
+
 export const handle = async (event: LambdaFunctionURLEvent): Promise<LambdaFunctionURLResult> => {
     console.log('event', event);
     try {
@@ -35,12 +61,25 @@ export const handle = async (event: LambdaFunctionURLEvent): Promise<LambdaFunct
         const database = new EmployeeDatabaseDynamoDB(client, tableName);
         // https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/urls-invocation.html
         const path = normalizePath(event.requestContext.http.path);
+        const method = event.requestContext.http.method;
         const query = event.queryStringParameters;
+        
+        // POSTとGETの分岐によるハンドラーの呼び出し
         if (path === "/api/employees") {
-            return getEmployeesHandler(database, query?.filterText ?? "");
+            if (method === "GET") {
+                return getEmployeesHandler(database, query?.filterText ?? "");
+            } else if (method === "POST") {
+                return createEmployeeHandler(database, event.body ?? "");
+            } else {
+                return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
+            }
         } else if (path.startsWith("/api/employees/")) {
             const id = path.substring("/api/employees/".length);
-            return getEmployeeHandler(database, id);
+            if (method === "GET") {
+                return getEmployeeHandler(database, id);
+            } else {
+                return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
+            }
         } else {
             console.log("Invalid path", path);
             return { statusCode: 400 };

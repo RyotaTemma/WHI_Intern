@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import * as t from "io-ts";
@@ -30,104 +31,112 @@ const employeesFetcher = async (url: string): Promise<Employee[]> => {
   return decoded.right;
 };
 
-export function EmployeeListContainer({ filterText }: EmployeesContainerProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, EmployeesContainerProps>(
+  ({ filterText }, ref) => {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
-  const getInitialViewMode = (): "list" | "card" => {
-    const view = searchParams.get("view");
-    if (view === "card") {
-      return "card";
+    const getInitialViewMode = (): "list" | "card" => {
+      const view = searchParams.get("view");
+      if (view === "card") {
+        return "card";
+      }
+      return "list"; // デフォルトは "list"
+    };
+
+    const [viewMode, setViewMode] = useState<"list" | "card">(getInitialViewMode);
+
+    const encodedFilterText = encodeURIComponent(filterText);
+    const { data, error, isLoading, mutate } = useSWR<Employee[], Error>(
+      `/api/employees?filterText=${encodedFilterText}`,
+      employeesFetcher
+    );
+
+    const handleViewModeChange = (mode: "list" | "card") => {
+      setViewMode(mode);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("view", mode);
+      router.replace(`${pathname}?${params.toString()}`);
+    };
+
+    useImperativeHandle(ref, () => ({
+      refresh: () => {
+        mutate();
+      },
+    }));
+
+    useEffect(() => {
+      if (error != null) {
+        console.error(`Failed to fetch employees filtered by filterText`, error);
+      }
+    }, [error, filterText]);
+
+    const ViewModeToggle = () => (
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Stack direction="row" spacing={1} divider={<Divider orientation="vertical" flexItem />}>
+          <Tooltip title="リスト表示">
+            <IconButton
+              color={viewMode === "list" ? "primary" : "default"}
+              onClick={() => handleViewModeChange("list")}
+            >
+              <ViewListIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="カード表示">
+            <IconButton
+              color={viewMode === "card" ? "primary" : "default"}
+              onClick={() => handleViewModeChange("card")}
+            >
+              <ViewModuleIcon />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Box>
+    );
+
+    if (isLoading) {
+      return <p>Loading employees...</p>;
     }
-    return "list"; // デフォルトは "list"
-  };
 
-  const [viewMode, setViewMode] = useState<"list" | "card">(getInitialViewMode);
-
-  const encodedFilterText = encodeURIComponent(filterText);
-  const { data, error, isLoading } = useSWR<Employee[], Error>(
-    `/api/employees?filterText=${encodedFilterText}`,
-    employeesFetcher
-  );
-
-  const handleViewModeChange = (mode: "list" | "card") => {
-    setViewMode(mode);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("view", mode);
-    router.replace(`${pathname}?${params.toString()}`);
-  };
-
-  useEffect(() => {
-    if (error != null) {
-      console.error(`Failed to fetch employees filtered by filterText`, error);
-    }
-  }, [error, filterText]);
-
-  const ViewModeToggle = () => (
-    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-      <Stack direction="row" spacing={1} divider={<Divider orientation="vertical" flexItem />}>
-        <Tooltip title="リスト表示">
-          <IconButton
-            color={viewMode === "list" ? "primary" : "default"}
-            onClick={() => handleViewModeChange("list")}
-          >
-            <ViewListIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="カード表示">
-          <IconButton
-            color={viewMode === "card" ? "primary" : "default"}
-            onClick={() => handleViewModeChange("card")}
-          >
-            <ViewModuleIcon />
-          </IconButton>
-        </Tooltip>
-      </Stack>
-    </Box>
-  );
-
-  if (isLoading) {
-    return <p>Loading employees...</p>;
-  }
-
-  if (data != null) {
-    return (
-      <>
-        <ViewModeToggle />
-        {viewMode === "list" ? (
-          // リスト表示の場合
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-            }}
-          >
-            {data.map((employee) => (
-              <EmployeeListItem
-                employee={employee}
-                key={employee.id}
-                viewMode={viewMode}
-              />
-            ))}
-          </Box>
-        ) : (
-          // カード表示の場合
-          <Grid container spacing={2}>
-            {data.map((employee) => (
-              <Grid key={employee.id}>
+    if (data != null) {
+      return (
+        <>
+          <ViewModeToggle />
+          {viewMode === "list" ? (
+            // リスト表示の場合
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
+              {data.map((employee) => (
                 <EmployeeListItem
                   employee={employee}
+                  key={employee.id}
                   viewMode={viewMode}
                 />
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </>
-    );
+              ))}
+            </Box>
+          ) : (
+            // カード表示の場合
+            <Grid container spacing={2}>
+              {data.map((employee) => (
+                <Grid key={employee.id}>
+                  <EmployeeListItem
+                    employee={employee}
+                    viewMode={viewMode}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </>
+      );
+    }
   }
+);
 
-
-}
+EmployeeListContainer.displayName = 'EmployeeListContainer';
