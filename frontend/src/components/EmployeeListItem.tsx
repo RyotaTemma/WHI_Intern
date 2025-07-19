@@ -6,34 +6,73 @@ import Link from "next/link";
 
 export type EmployeeListItemProps = {
   employee: Employee;
+  viewMode: "list" | "card";
 };
 
 export function EmployeeListItem(prop: EmployeeListItemProps) {
-  const employee = prop.employee;
-  return (
-    <Link
-      href={`/employee?id=${employee.id}`}
-      style={{ textDecoration: "none" }}
-    >
-      <Card
-        sx={{
-          transition: "background-color 0.2s",
-          "&:hover": {
-            backgroundColor: "#f0f0f0",
-          },
-        }}
+  const { employee, viewMode } = prop;
+
+  // リスト表示の場合
+  if (viewMode === "list") {
+    return (
+      <Link
+        href={`/employee?id=${employee.id}`}
+        style={{ textDecoration: "none" }}
       >
-        <CardContent>
-          <Box display="flex" flexDirection="row" alignItems="center" gap={2}>
-            <Avatar sx={{ width: 48, height: 48 }}>
-              <PersonIcon sx={{ fontSize: 48 }} />
-            </Avatar>
-            <Box display="flex" flexDirection="column">
-              <Typography>{employee.name}</Typography>
+        <Card
+          sx={{
+            transition: "background-color 0.2s",
+            "&:hover": {
+              backgroundColor: "#f0f0f0",
+            },
+          }}
+        >
+          <CardContent>
+            <Box display="flex" flexDirection="row" alignItems="center" gap={2}>
+              <Avatar sx={{ width: 48, height: 48 }}>
+                <PersonIcon sx={{ fontSize: 48 }} />
+              </Avatar>
+              <Box display="flex" flexDirection="column">
+                <Typography>{employee.name}</Typography>
+              </Box>
             </Box>
-          </Box>
-        </CardContent>
-      </Card>
-    </Link>
-  );
+          </CardContent>
+        </Card>
+      </Link>
+    );
+  }
+
+  // カード表示の場合
+  else if (viewMode === "card") {
+    return (
+      <Link
+        href={`/employee?id=${employee.id}`}
+        style={{ textDecoration: "none" }}
+      >
+        <Card
+          sx={{
+            width: 200,
+            height: 200,
+            transition: "background-color 0.2s",
+            "&:hover": {
+              backgroundColor: "#f0f0f0",
+            },
+          }}
+        >
+          <CardContent>
+            <Box display="flex" flexDirection="row" alignItems="center" gap={2}>
+              <Avatar sx={{ width: 48, height: 48 }}>
+                <PersonIcon sx={{ fontSize: 48 }} />
+              </Avatar>
+              <Box display="flex" flexDirection="column">
+                <Typography>{employee.name}</Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      </Link>
+    );
+  }
+
+  return null;
 }
