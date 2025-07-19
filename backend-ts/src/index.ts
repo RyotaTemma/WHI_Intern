@@ -33,14 +33,14 @@ app.get("/api/employees", async (req: Request, res: Response) => {
 
 app.post("/api/employees", async (req: Request, res: Response) => {
     try {
-        const { name, age } = req.body;
+        const { name, age, affiliation, post, skills } = req.body;
         
         if (!name || typeof name !== 'string' || !age || typeof age !== 'number') {
             res.status(400).send(JSON.stringify({ error: 'name (string) and age (number) are required' }));
             return;
         }
         
-        const newEmployee = await database.createEmployee(name, age);
+        const newEmployee = await database.createEmployee(name, age, affiliation, post, skills);
         res.status(201).send(JSON.stringify(newEmployee));
     } catch (error) {
         console.error('Error creating employee:', error);

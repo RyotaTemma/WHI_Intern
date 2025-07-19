@@ -65,7 +65,7 @@ export class EmployeeDatabaseDynamoDB implements EmployeeDatabase {
             });
     }
 
-    async createEmployee(name: string, age: number): Promise<Employee> {
+    async createEmployee(name: string, age: number, affiliation: string, post: string, skills: string[]): Promise<Employee> {
         // 未実装のため、エラーを投げる
         throw new Error("DynamoDB implementation not available yet. Please use EmployeeDatabaseInMemory for now.");
     }
