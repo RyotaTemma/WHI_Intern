@@ -16,6 +16,10 @@ export type EmployeesContainerProps = {
   filterText: string;
 };
 
+export type EmployeeListContainerRef = {
+  refresh: () => void;
+};
+
 const EmployeesT = t.array(EmployeeT);
 
 const employeesFetcher = async (url: string): Promise<Employee[]> => {
