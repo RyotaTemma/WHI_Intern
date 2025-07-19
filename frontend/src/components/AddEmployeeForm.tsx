@@ -38,8 +38,8 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
     }
     
     const ageNumber = parseInt(age, 10);
-    if (isNaN(ageNumber) || ageNumber <= 0) {
-      setError("有効な年齢を入力してください");
+    if (isNaN(ageNumber) || ageNumber < 1 || ageNumber > 100) {
+      setError("年齢は1〜100歳の範囲で入力してください");
       return;
     }
 
@@ -164,8 +164,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
               fullWidth
               value={age}
               onChange={(e) => setAge(e.target.value)}
-              placeholder="年齢を入力"
-              inputProps={{ min: 1, max: 100 }}
+              placeholder="年齢を入力（1〜100歳）"
               disabled={isSubmitting}
               required
             />
