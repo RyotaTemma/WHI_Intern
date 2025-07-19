@@ -5,9 +5,9 @@ import { useCallback, useState } from "react";
 
 const tabPanelValue = {
   basicInfo: "基本情報",
-  // Affiliation: "所属",
-  // Post: "役職",
-  // Skills: "スキル",
+  Affiliation: "所属",
+  Post: "役職",
+  Skills: "スキル",
   others: "その他",
 };
 
