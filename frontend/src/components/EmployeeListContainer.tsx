@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, forwardRef, useImperativeHandle } from "react";
 import useSWR from "swr";
 import * as t from "io-ts";
 import { isLeft } from "fp-ts/Either";
@@ -8,6 +8,10 @@ import { Employee, EmployeeT } from "../models/Employee";
 
 export type EmployeesContainerProps = {
   filterText: string;
+};
+
+export type EmployeeListContainerRef = {
+  refresh: () => void;
 };
 
 const EmployeesT = t.array(EmployeeT);
@@ -25,23 +29,35 @@ const employeesFetcher = async (url: string): Promise<Employee[]> => {
   return decoded.right;
 };
 
-export function EmployeeListContainer({ filterText }: EmployeesContainerProps) {
-  const encodedFilterText = encodeURIComponent(filterText);
-  const { data, error, isLoading } = useSWR<Employee[], Error>(
-    `/api/employees?filterText=${encodedFilterText}`,
-    employeesFetcher
-  );
-  useEffect(() => {
-    if (error != null) {
-      console.error(`Failed to fetch employees filtered by filterText`, error);
+export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, EmployeesContainerProps>(
+  ({ filterText }, ref) => {
+    const encodedFilterText = encodeURIComponent(filterText);
+    const { data, error, isLoading, mutate } = useSWR<Employee[], Error>(
+      `/api/employees?filterText=${encodedFilterText}`,
+      employeesFetcher
+    );
+
+    useImperativeHandle(ref, () => ({
+      refresh: () => {
+        mutate();
+      },
+    }));
+
+    useEffect(() => {
+      if (error != null) {
+        console.error(`Failed to fetch employees filtered by filterText`, error);
+      }
+    }, [error, filterText]);
+    
+    if (data != null) {
+      return data.map((employee) => (
+        <EmployeeListItem employee={employee} key={employee.id} />
+      ));
     }
-  }, [error, filterText]);
-  if (data != null) {
-    return data.map((employee) => (
-      <EmployeeListItem employee={employee} key={employee.id} />
-    ));
+    if (isLoading) {
+      return <p>Loading employees...</p>;
+    }
   }
-  if (isLoading) {
-    return <p>Loading employees...</p>;
-  }
-}
+);
+
+EmployeeListContainer.displayName = 'EmployeeListContainer';

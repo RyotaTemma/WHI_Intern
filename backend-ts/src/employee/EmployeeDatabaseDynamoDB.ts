@@ -64,6 +64,11 @@ export class EmployeeDatabaseDynamoDB implements EmployeeDatabase {
                 }
             });
     }
+
+    async createEmployee(name: string, age: number): Promise<Employee> {
+        // 未実装のため、エラーを投げる
+        throw new Error("DynamoDB implementation not available yet. Please use EmployeeDatabaseInMemory for now.");
+    }
 }
 
 function mapNullable<T, U>(value: T | null | undefined, mapper: (value: T) => U): U | undefined {
