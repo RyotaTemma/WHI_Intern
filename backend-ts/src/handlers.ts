@@ -27,7 +27,7 @@ const getEmployeesHandler = async (database: EmployeeDatabase, filterText: strin
 const createEmployeeHandler = async (database: EmployeeDatabase, body: string): Promise<LambdaFunctionURLResult> => {
     try {
         const requestData = JSON.parse(body);
-        const { name, age } = requestData;
+        const { name, age, affiliation, post, skills } = requestData;
         
         if (!name || typeof name !== 'string' || !age || typeof age !== 'number') {
             return {
@@ -35,8 +35,29 @@ const createEmployeeHandler = async (database: EmployeeDatabase, body: string): 
                 body: JSON.stringify({ error: 'name (string) and age (number) are required' }),
             };
         }
+
+        if (!affiliation || typeof affiliation !== 'string') {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'affiliation (string) is required' }),
+            };
+        }
+
+        if (!post || typeof post !== 'string') {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'post (string) is required' }),
+            };
+        }
+
+        if (!skills || !Array.isArray(skills) || !skills.every(skill => typeof skill === 'string')) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'skills (array of strings) is required' }),
+            };
+        }
         
-        const newEmployee = await database.createEmployee(name, age);
+        const newEmployee = await database.createEmployee(name, age, affiliation, post, skills);
         return {
             statusCode: 201,
             body: JSON.stringify(newEmployee),

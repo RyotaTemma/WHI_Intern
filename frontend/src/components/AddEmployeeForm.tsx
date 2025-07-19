@@ -24,6 +24,9 @@ export type AddEmployeeFormProps = {
 export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
+  const [affiliation, setAffiliation] = useState("");
+  const [post, setPost] = useState("");
+  const [skills, setSkills] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -42,6 +45,28 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
       return;
     }
 
+    if (!affiliation.trim()) {
+      setError("所属を入力してください");
+      return;
+    }
+
+    if (!post.trim()) {
+      setError("役職を入力してください");
+      return;
+    }
+
+    if (!skills.trim()) {
+      setError("スキルを入力してください");
+      return;
+    }
+
+    // スキルをカンマ区切りで分割し、空白を除去
+    const skillsArray = skills.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0);
+    if (skillsArray.length === 0) {
+      setError("少なくとも1つのスキルを入力してください");
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -54,6 +79,9 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
         body: JSON.stringify({
           name: name.trim(),
           age: ageNumber,
+          affiliation: affiliation.trim(),
+          post: post.trim(),
+          skills: skillsArray,
         }),
       });
 
@@ -67,6 +95,9 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
       // Reset form and close it
       setName("");
       setAge("");
+      setAffiliation("");
+      setPost("");
+      setSkills("");
       setError(null);
       setIsFormOpen(false);
       
@@ -85,6 +116,9 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
   const handleCancel = () => {
     setName("");
     setAge("");
+    setAffiliation("");
+    setPost("");
+    setSkills("");
     setError(null);
     setIsFormOpen(false);
   };
@@ -164,6 +198,39 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
               value={age}
               onChange={(e) => setAge(e.target.value)}
               placeholder="年齢を入力（1〜100歳）"
+              disabled={isSubmitting}
+              required
+            />
+
+            <TextField
+              label="所属"
+              variant="outlined"
+              fullWidth
+              value={affiliation}
+              onChange={(e) => setAffiliation(e.target.value)}
+              placeholder="従業員の所属を入力"
+              disabled={isSubmitting}
+              required
+            />
+
+            <TextField
+              label="役職"
+              variant="outlined"
+              fullWidth
+              value={post}
+              onChange={(e) => setPost(e.target.value)}
+              placeholder="従業員の役職を入力"
+              disabled={isSubmitting}
+              required
+            />
+
+            <TextField
+              label="スキル"
+              variant="outlined"
+              fullWidth
+              value={skills}
+              onChange={(e) => setSkills(e.target.value)}
+              placeholder="従業員のスキルをカンマ区切りで入力"
               disabled={isSubmitting}
               required
             />
