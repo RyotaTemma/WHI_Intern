@@ -9,7 +9,7 @@ export function SearchEmployees() {
   const [searchKeyword, setSearchKeyword] = useState("");
   const employeeListRef = useRef<EmployeeListContainerRef>(null);
 
-  const handleEmployeeAdded = (employee: Employee) => {
+  const handleEmployeeAdded = () => {
     // Refresh the employee list after adding a new employee
     if (employeeListRef.current) {
       employeeListRef.current.refresh();
