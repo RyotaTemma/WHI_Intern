@@ -1,10 +1,21 @@
 "use client";
 import { Paper, TextField } from "@mui/material";
-import { useState } from "react";
-import { EmployeeListContainer } from "./EmployeeListContainer";
+import { useState, useRef } from "react";
+import { EmployeeListContainer, EmployeeListContainerRef } from "./EmployeeListContainer";
+import { AddEmployeeForm } from "./AddEmployeeForm";
+import { Employee } from "../models/Employee";
 
 export function SearchEmployees() {
   const [searchKeyword, setSearchKeyword] = useState("");
+  const employeeListRef = useRef<EmployeeListContainerRef>(null);
+
+  const handleEmployeeAdded = (employee: Employee) => {
+    // Refresh the employee list after adding a new employee
+    if (employeeListRef.current) {
+      employeeListRef.current.refresh();
+    }
+  };
+
   return (
     <Paper
       sx={{
@@ -15,6 +26,8 @@ export function SearchEmployees() {
         p: 2,
       }}
     >
+      <AddEmployeeForm onEmployeeAdded={handleEmployeeAdded} />
+      
       <TextField
         placeholder="検索キーワードを入力してください"
         value={searchKeyword}
@@ -23,6 +36,7 @@ export function SearchEmployees() {
       <EmployeeListContainer
         key="employeesContainer"
         filterText={searchKeyword}
+        ref={employeeListRef}
       />
     </Paper>
   );
