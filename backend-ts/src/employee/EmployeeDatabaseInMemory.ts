@@ -38,7 +38,10 @@ export class EmployeeDatabaseInMemory implements EmployeeDatabase {
         const newEmployee: Employee = {
             id: nextId.toString(),
             name: name,
-            age: age
+            age: age,
+            affiliation: "Engineering",
+            post: "Software Engineer",
+            skills: ["JavaScript", "TypeScript"]
         };
     
         // 4) マップに登録

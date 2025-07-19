@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { SearchEmployees } from "../components/SearchEmployees";
 import { GlobalContainer } from "@/components/GlobalContainer";
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: "タレントマネジメントシステム - 社員検索",
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <GlobalContainer>
-      <SearchEmployees />
+      <Suspense fallback={<div>Loading...</div>}>
+        <SearchEmployees />
+      </Suspense>
     </GlobalContainer>
   );
 }
