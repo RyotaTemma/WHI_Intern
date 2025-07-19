@@ -5,6 +5,9 @@ import { useCallback, useState } from "react";
 
 const tabPanelValue = {
   basicInfo: "基本情報",
+  Affiliation: "所属",
+  Post: "役職",
+  Skills: "スキル",
   others: "その他",
 };
 
@@ -75,6 +78,9 @@ export function EmployeeDetails(prop: EmployeeDetailsProps) {
           <Box p={2} display="flex" flexDirection="column" gap={1}>
             <Typography variant="h6">基本情報</Typography>
             <Typography>年齢：{employee.age}歳</Typography>
+            <Typography>所属：{employee.affiliation}</Typography>
+            <Typography>役職：{employee.post}</Typography>            
+            <Typography>スキル：{employee.skills.join(', ')}</Typography>            
           </Box>
         </TabContent>
 
