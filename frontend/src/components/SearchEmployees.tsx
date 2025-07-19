@@ -3,7 +3,6 @@ import { Paper, TextField } from "@mui/material";
 import { useState, useRef } from "react";
 import { EmployeeListContainer, EmployeeListContainerRef } from "./EmployeeListContainer";
 import { AddEmployeeForm } from "./AddEmployeeForm";
-import { Employee } from "../models/Employee";
 
 export function SearchEmployees() {
   const [searchKeyword, setSearchKeyword] = useState("");
