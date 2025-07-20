@@ -9,6 +9,7 @@ mkdir -p "layers/nodejs"
 cp package-lock.json "layers/nodejs/package-lock.json"
 cp package.json "layers/nodejs/package.json"
 npm ci --omit=dev --prefix "layers/nodejs"
+npm ci
 npm run build
 cd -
 
