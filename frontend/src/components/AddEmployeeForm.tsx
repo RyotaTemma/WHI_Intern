@@ -59,10 +59,18 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  // フォーム選択肢データを取得
+  // フォーム選択肢データを取得（積極的キャッシュ設定）
   const { data: formOptions, error: fetchError } = useSWR<FormOptions, Error>(
     "/api/form-options",
-    formOptionsFetcher
+    formOptionsFetcher,
+    {
+      // 選択肢データは静的なので積極的にキャッシュ
+      revalidateOnFocus: false,        // フォーカス時の再検証を無効
+      revalidateOnReconnect: false,    // ネットワーク再接続時の再検証を無効
+      revalidateIfStale: false,        // staleでも再検証しない
+      dedupingInterval: 24 * 60 * 60 * 1000, // 24時間は重複リクエストを無効化
+      focusThrottleInterval: 60 * 60 * 1000,  // フォーカス時の再検証を1時間に制限
+    }
   );
 
   // 選択肢を取得
