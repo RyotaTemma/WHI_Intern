@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 import { BackButton } from "@/components/BackButton";
 
 export const metadata: Metadata = {
-  title: "タレントマネジメントシステム - 社員詳細",
+  title: "Talentia - 社員詳細",
 };
 
 export default function EmployeePage() {

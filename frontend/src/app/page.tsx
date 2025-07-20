@@ -5,7 +5,7 @@ import { GlobalContainer } from "@/components/GlobalContainer";
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: "タレントマネジメントシステム - 社員検索",
+  title: "Talentia - 社員検索",
 };
 
 export default function Home() {
