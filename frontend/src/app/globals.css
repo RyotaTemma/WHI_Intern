@@ -1,7 +1,4 @@
-:root {
-  --background: #f0f0f0;
-  --foreground: #171717;
-}
+/* Material-UIのCssBaselineが基本スタイルを管理するため、必要最小限のカスタムスタイルのみ */
 
 html,
 body {
@@ -10,17 +7,12 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 a {

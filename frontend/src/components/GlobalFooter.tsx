@@ -14,6 +14,7 @@ export function GlobalFooter() {
         gap: 4,
         px: 8,
         py: 1,
+        backgroundColor: '#ffffff',  // 白色で固定
       }}
     >
       <Button
@@ -39,6 +40,7 @@ export function GlobalFooter() {
         href="https://www.career.works-hi.co.jp/job/intership/"
         target="_blank"
         rel="noopener noreferrer"
+        sx={{ color: '#000000' }}  // 白背景に合わせて黒文字で固定
       >
         インターンシップ
       </Button>
@@ -48,6 +50,7 @@ export function GlobalFooter() {
         href="https://www.career.works-hi.co.jp/beginners/tech/"
         target="_blank"
         rel="noopener noreferrer"
+        sx={{ color: '#000000' }}  // 白背景に合わせて黒文字で固定
       >
         エンジニア採用
       </Button>

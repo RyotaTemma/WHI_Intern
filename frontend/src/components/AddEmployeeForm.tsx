@@ -11,7 +11,6 @@ import {
   Collapse,
   IconButton,
   Autocomplete,
-  Chip
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
@@ -192,11 +191,11 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
           alignItems: "center",
           justifyContent: "space-between",
           p: 2,
-          backgroundColor: isFormOpen ? "#e3f2fd" : "#fafafa",
+          backgroundColor: isFormOpen ? 'action.selected' : 'action.hover',  // Material-UI標準色
           cursor: "pointer",
           transition: "background-color 0.2s",
           "&:hover": {
-            backgroundColor: isFormOpen ? "#bbdefb" : "#f0f0f0",
+            backgroundColor: isFormOpen ? 'action.focus' : 'action.selected',  // Material-UI標準色
           },
         }}
         onClick={toggleForm}
@@ -221,7 +220,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
 
       {/* 折りたたみ式フォーム */}
       <Collapse in={isFormOpen}>
-        <Box sx={{ p: 3, pt: 2, backgroundColor: "white" }}>
+        <Box sx={{ p: 3, pt: 2, backgroundColor: 'background.paper' }}>
           <Divider sx={{ mb: 3 }} />
           
           <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -297,11 +296,6 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
                   disabled={isSubmitting}
                 />
               )}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Chip variant="outlined" label={option} {...getTagProps({ index })} key={index} />
-                ))
-              }
               disabled={isSubmitting}
             />
             
