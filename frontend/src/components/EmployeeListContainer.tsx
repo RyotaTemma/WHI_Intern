@@ -12,8 +12,17 @@ import ViewListIcon from "@mui/icons-material/ViewList";
 
 import { Box, IconButton, Tooltip, Stack, Divider, Grid } from "@mui/material";
 
+// フィルターの型を定義
+export interface EmployeeFilters {
+  name?: string;
+  affiliation?: string;
+  post?: string;
+  skill?: string;
+}
+
+// propsの型を`filters`オブジェクトを受け取るように変更
 export type EmployeesContainerProps = {
-  filterText: string;
+  filters: EmployeeFilters;
 };
 
 export type EmployeeListContainerRef = {
@@ -36,24 +45,32 @@ const employeesFetcher = async (url: string): Promise<Employee[]> => {
 };
 
 export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, EmployeesContainerProps>(
-  ({ filterText }, ref) => {
+  ({ filters }, ref) => {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
     const getInitialViewMode = (): "list" | "card" => {
       const view = searchParams.get("view");
-      if (view === "card") {
-        return "card";
-      }
-      return "list"; // デフォルトは "list"
+      return view === "card" ? "card" : "list";
     };
 
     const [viewMode, setViewMode] = useState<"list" | "card">(getInitialViewMode);
 
-    const encodedFilterText = encodeURIComponent(filterText);
+    // `filters`オブジェクトからAPIのURLクエリを動的に生成
+    const swrKey = (() => {
+      const params = new URLSearchParams();
+      // 各フィルターの値が存在する場合のみ、クエリパラメータに追加
+      if (filters.name) params.append('name', filters.name);
+      if (filters.affiliation) params.append('affiliation', filters.affiliation);
+      if (filters.post) params.append('post', filters.post);
+      if (filters.skill) params.append('skill', filters.skill);
+      return `/api/employees?${params.toString()}`;
+    })();
+
+    // 生成したキーを`useSWR`に渡す
     const { data, error, isLoading, mutate } = useSWR<Employee[], Error>(
-      `/api/employees?filterText=${encodedFilterText}`,
+      swrKey,
       employeesFetcher
     );
 
@@ -72,9 +89,9 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
 
     useEffect(() => {
       if (error != null) {
-        console.error(`Failed to fetch employees filtered by filterText`, error);
+        console.error(`Failed to fetch employees`, error);
       }
-    }, [error, filterText]);
+    }, [error]); // `filterText`への依存を削除
 
     const ViewModeToggle = () => (
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
