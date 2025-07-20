@@ -23,3 +23,12 @@ jobs:
 
       - name: Build the project
         run: cd frontend && npm run build
+
+      - name: Run frontend lint
+        run: cd frontend && npm run lint
+
+      - name: Run backend-ts lint
+        run: cd backend-ts && npm run lint
+      
+      - name : Run cdk-ts lint
+        run : cd cdk-ts && npm run lint
