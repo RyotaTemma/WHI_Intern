@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: '23'
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: cd frontend && npm install
 
       - name: Build the project
@@ -27,8 +27,14 @@ jobs:
       - name: Run frontend lint
         run: cd frontend && npm run lint
 
+      - name: Install backend-ts dependencies
+        run: cd backend-ts && npm install
+
       - name: Run backend-ts lint
         run: cd backend-ts && npm run lint
       
+      - name: Install cdk-ts dependencies
+        run: cd cdk-ts && npm install
+
       - name : Run cdk-ts lint
         run : cd cdk-ts && npm run lint
