@@ -5,10 +5,18 @@ on:
     branches:
       -  settingCD # ブランチにpushした場合に動作する
 jobs:
-  pre-merge-build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '23'
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
