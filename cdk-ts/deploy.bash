@@ -5,9 +5,10 @@ PROJECT_ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 echo "Building backend."
 cd "$PROJECT_ROOT_DIR/backend-ts"
-npm ci
 mkdir -p "layers/nodejs" 
-cp -r node_modules "layers/nodejs/node_modules"
+cp package-lock.json "layers/nodejs/package-lock.json"
+cp package.json "layers/nodejs/package.json"
+npm ci --omit=dev --prefix "layers/nodejs"
 npm run build
 cd -
 
