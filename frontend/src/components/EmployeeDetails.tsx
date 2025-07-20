@@ -61,11 +61,23 @@ export function EmployeeDetails(prop: EmployeeDetailsProps) {
           alignItems="center"
           p={2}
           gap={2}
+          width="100%"
         >
           <Avatar sx={{ width: 128, height: 128 }}>
             <PersonIcon sx={{ fontSize: 128 }} />
           </Avatar>
-          <Typography variant="h5">{employee.name}</Typography>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography
+              variant="h5"
+              sx={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {employee.name}
+            </Typography>
+          </Box>
         </Box>
         <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
           <Tabs value={selectedTabValue} onChange={handleTabValueChange}>
@@ -79,8 +91,8 @@ export function EmployeeDetails(prop: EmployeeDetailsProps) {
             <Typography variant="h6">基本情報</Typography>
             <Typography>年齢：{employee.age}歳</Typography>
             <Typography>所属：{employee.affiliation}</Typography>
-            <Typography>役職：{employee.post}</Typography>            
-            <Typography>スキル：{employee.skills.join(', ')}</Typography>            
+            <Typography>役職：{employee.post}</Typography>
+            <Typography>スキル：{employee.skills.join(', ')}</Typography>
           </Box>
         </TabContent>
 
