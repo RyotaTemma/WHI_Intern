@@ -11,7 +11,6 @@ import {
   Collapse,
   IconButton,
   Autocomplete,
-  Chip
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
@@ -192,17 +191,11 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
           alignItems: "center",
           justifyContent: "space-between",
           p: 2,
-          backgroundColor: (theme) => 
-            isFormOpen 
-              ? theme.palette.mode === 'light' ? '#e3f2fd' : 'rgba(94, 194, 198, 0.08)'
-              : theme.palette.mode === 'light' ? '#fafafa' : 'rgba(255, 255, 255, 0.02)',
+          backgroundColor: isFormOpen ? 'action.selected' : 'action.hover',  // Material-UI標準色
           cursor: "pointer",
           transition: "background-color 0.2s",
           "&:hover": {
-            backgroundColor: (theme) =>
-              isFormOpen
-                ? theme.palette.mode === 'light' ? '#bbdefb' : 'rgba(94, 194, 198, 0.12)'
-                : theme.palette.mode === 'light' ? '#f0f0f0' : 'rgba(255, 255, 255, 0.05)',
+            backgroundColor: isFormOpen ? 'action.focus' : 'action.selected',  // Material-UI標準色
           },
         }}
         onClick={toggleForm}

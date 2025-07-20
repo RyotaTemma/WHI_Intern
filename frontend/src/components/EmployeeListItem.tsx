@@ -23,8 +23,7 @@ export function EmployeeListItem(prop: EmployeeListItemProps) {
           sx={{
             transition: "background-color 0.2s",
             "&:hover": {
-              backgroundColor: (theme) => 
-                theme.palette.mode === 'light' ? '#f0f0f0' : 'rgba(255, 255, 255, 0.08)',
+              backgroundColor: 'action.hover',  // Material-UI標準のホバー色
             },
           }}
         >
@@ -56,8 +55,7 @@ export function EmployeeListItem(prop: EmployeeListItemProps) {
             height: 200,
             transition: "background-color 0.2s",
             "&:hover": {
-              backgroundColor: (theme) => 
-                theme.palette.mode === 'light' ? '#f0f0f0' : 'rgba(255, 255, 255, 0.08)',
+              backgroundColor: 'action.hover',  // Material-UI標準のホバー色
             },
           }}
         >
