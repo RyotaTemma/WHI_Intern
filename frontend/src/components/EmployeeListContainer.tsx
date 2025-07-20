@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import { useEffect, useState, forwardRef, useImperativeHandle, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import * as t from "io-ts";
@@ -9,6 +9,7 @@ import { EmployeeListItem } from "./EmployeeListItem";
 import { Employee, EmployeeT } from "../models/Employee";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import ViewListIcon from "@mui/icons-material/ViewList";
+import { SortKey, SortOrder } from "./SortController";
 
 import { Box, IconButton, Tooltip, Stack, Divider, Grid } from "@mui/material";
 
@@ -20,9 +21,13 @@ export interface EmployeeFilters {
   skill?: string;
 }
 
-// propsの型を`filters`オブジェクトを受け取るように変更
+// propsの型定義に`sort`を追加
 export type EmployeesContainerProps = {
   filters: EmployeeFilters;
+  sort: {
+    key: SortKey;
+    order: SortOrder;
+  };
 };
 
 export type EmployeeListContainerRef = {
@@ -45,7 +50,9 @@ const employeesFetcher = async (url: string): Promise<Employee[]> => {
 };
 
 export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, EmployeesContainerProps>(
-  ({ filters }, ref) => {
+  // ▼▼▼ 変更・追加点 ▼▼▼
+  // sortをpropsとして受け取る
+  ({ filters, sort }, ref) => {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -57,10 +64,8 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
 
     const [viewMode, setViewMode] = useState<"list" | "card">(getInitialViewMode);
 
-    // `filters`オブジェクトからAPIのURLクエリを動的に生成
     const swrKey = (() => {
       const params = new URLSearchParams();
-      // 各フィルターの値が存在する場合のみ、クエリパラメータに追加
       if (filters.name) params.append('name', filters.name);
       if (filters.affiliation) params.append('affiliation', filters.affiliation);
       if (filters.post) params.append('post', filters.post);
@@ -68,11 +73,50 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
       return `/api/employees?${params.toString()}`;
     })();
 
-    // 生成したキーを`useSWR`に渡す
     const { data, error, isLoading, mutate } = useSWR<Employee[], Error>(
       swrKey,
       employeesFetcher
     );
+
+    // ▼▼▼ 変更・追加点 ▼▼▼
+    // useMemoを使ってソート済みのデータを作成
+    const sortedData = useMemo(() => {
+      // SWRからデータがまだ返ってきていない場合は空配列を返す
+      if (!data) {
+        return [];
+      }
+
+      // sort.keyが空文字（falsy）の場合、並び替えせずに元のデータを返す
+      // これが型ガードとして機能し、以降の処理でsort.keyが有効なキーであることをTypeScriptに伝える
+      if (!sort.key) {
+        return data;
+      }
+
+      type ValidSortKey = Exclude<SortKey, ''>; // '' を除いた正当なキー型
+      const key = sort.key as ValidSortKey;     // 明示的にキャスト
+
+      // 元のdata配列を直接変更しないようにコピーを作成
+      const sortableData = [...data];
+
+      sortableData.sort((a, b) => {
+        const valA = a[key];
+        const valB = b[key];
+
+        let comparison = 0;
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          comparison = valA - valB;
+        } else {
+          // skills（配列）の場合でも、先頭の要素で文字列比較を行う
+          const strA = Array.isArray(valA) ? (valA[0] || '') : String(valA);
+          const strB = Array.isArray(valB) ? (valB[0] || '') : String(valB);
+          comparison = strA.localeCompare(strB, 'ja');
+        }
+
+        return sort.order === 'desc' ? comparison * -1 : comparison;
+      });
+      
+      return sortableData;
+    }, [data, sort.key, sort.order]);// dataかソート条件が変わった時だけ再計算
 
     const handleViewModeChange = (mode: "list" | "card") => {
       setViewMode(mode);
@@ -91,7 +135,7 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
       if (error != null) {
         console.error(`Failed to fetch employees`, error);
       }
-    }, [error]); // `filterText`への依存を削除
+    }, [error]);
 
     const ViewModeToggle = () => (
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
@@ -120,12 +164,13 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
       return <p>Loading employees...</p>;
     }
 
-    if (data != null) {
+    // ▼▼▼ 変更・追加点 ▼▼▼
+    // エラーがなく、ソート済みデータがある場合に表示
+    if (sortedData) {
       return (
         <>
           <ViewModeToggle />
           {viewMode === "list" ? (
-            // リスト表示の場合
             <Box
               sx={{
                 display: "flex",
@@ -133,7 +178,8 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
                 gap: 2,
               }}
             >
-              {data.map((employee) => (
+              {/* 表示するデータを `data` から `sortedData` に変更 */}
+              {sortedData.map((employee) => (
                 <EmployeeListItem
                   employee={employee}
                   key={employee.id}
@@ -142,11 +188,12 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
               ))}
             </Box>
           ) : (
-            // カード表示の場合
             <Grid container spacing={2}>
-              {data.map((employee) => (
-                <Grid key={employee.id}>
-                  <EmployeeListItem
+              {/* 表示するデータを `data` から `sortedData` に変更 */}
+              {sortedData.map((employee) => (
+                // <Grid item xs={12} sm={6} md={4} key={employee.id}>
+                <Grid  key={employee.id}>
+                  <EmployeeListItem 
                     employee={employee}
                     viewMode={viewMode}
                   />
@@ -156,6 +203,11 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
           )}
         </>
       );
+    }
+    
+    // エラー時の表示（任意）
+    if (error) {
+      return <p>Error loading employees...</p>;
     }
   }
 );
