@@ -17,7 +17,7 @@ jobs:
           aws-region: ap-northeast-1
 
       - name: Deploy to S3
-        run: cd cdk-ts && deploy.bash
+        run: cd cdk-ts && ./deploy.bash
 
       - name: Invalidate CloudFront cache
         run: |
