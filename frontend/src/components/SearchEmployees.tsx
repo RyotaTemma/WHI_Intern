@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { EmployeeListContainer, EmployeeListContainerRef } from "./EmployeeListContainer";
 import { AddEmployeeForm } from "./AddEmployeeForm";
 import { AttributeFilter } from "./AttributeFilter";
+import { useTranslations } from '../hooks/useTranslations';
 
 export function SearchEmployees() {
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -13,6 +14,7 @@ export function SearchEmployees() {
   const [skill, setSkill] = useState("");
 
   const employeeListRef = useRef<EmployeeListContainerRef>(null);
+  const t = useTranslations('employee');
 
   const handleEmployeeAdded = () => {
     // Refresh the employee list after adding a new employee
@@ -34,7 +36,7 @@ export function SearchEmployees() {
       <AddEmployeeForm onEmployeeAdded={handleEmployeeAdded} />
 
       <TextField
-        placeholder="検索キーワードを入力してください"
+        placeholder={t('search')}
         value={searchKeyword}
         onChange={(e) => setSearchKeyword(e.target.value)}
       />

@@ -3,6 +3,7 @@
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Box from "@mui/material/Box";
 import { MenuItem } from "@mui/material";
+import { useTranslations } from '../hooks/useTranslations';
 
 // propsの型を定義
 interface AttributeFilterProps {
@@ -22,11 +23,12 @@ export function AttributeFilter ({
   onPostChange,
   onSkillChange,
 }: AttributeFilterProps) {
+  const t = useTranslations('filter');
 
   return (
     <Box sx={{ display: 'flex', gap: 2 }}>
       <Select value={affiliation} onChange={onAffiliationChange} displayEmpty fullWidth>
-        <MenuItem value="">所属を選択</MenuItem>
+        <MenuItem value="">{t('selectAffiliation')}</MenuItem>
         <MenuItem value="Engineering">Engineering</MenuItem>
         <MenuItem value="Marketing">Marketing</MenuItem>
         <MenuItem value="Sales">Sales</MenuItem>
@@ -36,7 +38,7 @@ export function AttributeFilter ({
       </Select>
 
       <Select value={post} onChange={onPostChange} displayEmpty fullWidth>
-        <MenuItem value="">役職を選択</MenuItem>
+        <MenuItem value="">{t('selectPost')}</MenuItem>
         <MenuItem value="Software Engineer">Software Engineer</MenuItem>
         <MenuItem value="Senior Software Engineer">Senior Software Engineer</MenuItem>
         <MenuItem value="Tech Lead">Tech Lead</MenuItem>
@@ -50,7 +52,7 @@ export function AttributeFilter ({
       </Select>
 
       <Select value={skill} onChange={onSkillChange} displayEmpty fullWidth>
-        <MenuItem value="">スキルを選択</MenuItem>
+        <MenuItem value="">{t('selectSkill')}</MenuItem>
         <MenuItem value="JavaScript">JavaScript</MenuItem>
         <MenuItem value="TypeScript">TypeScript</MenuItem>
         <MenuItem value="React">React</MenuItem>

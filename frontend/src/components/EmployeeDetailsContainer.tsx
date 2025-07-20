@@ -5,6 +5,7 @@ import { isLeft } from "fp-ts/Either";
 import { Employee, EmployeeT } from "../models/Employee";
 import { useSearchParams } from "next/navigation";
 import { EmployeeDetails } from "./EmployeeDetails";
+import { useTranslations } from '../hooks/useTranslations';
 
 const employeeFetcher = async (url: string): Promise<Employee> => {
   const response = await fetch(url);
@@ -21,6 +22,7 @@ const employeeFetcher = async (url: string): Promise<Employee> => {
 
 export function EmployeeDetailsContainer() {
   const id = useSearchParams().get("id");
+  const t = useTranslations('common');
 
   const { data, error, isLoading } = useSWR<Employee, Error>(
     `/api/employees/${id}`,
@@ -34,7 +36,7 @@ export function EmployeeDetailsContainer() {
   if (error != null) {
     return (
       <p>
-        社員の詳細の取得に失敗しました: {error.message} <br />
+        {t('error')}: {error.message} <br />
       </p>
     );
   }
@@ -42,6 +44,6 @@ export function EmployeeDetailsContainer() {
     return <EmployeeDetails employee={data} />;
   }
   if (isLoading) {
-    return <p>Loading employee {id}...</p>;
+    return <p>{t('loading')}</p>;
   }
 }

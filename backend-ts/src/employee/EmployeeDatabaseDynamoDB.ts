@@ -1,4 +1,4 @@
-import { DynamoDBClient, GetItemCommand, GetItemCommandInput, ScanCommand, ScanCommandInput } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, GetItemCommand, GetItemCommandInput, ScanCommand, ScanCommandInput, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { isLeft } from "fp-ts/Either";
 import { EmployeeDatabase, EmployeeFilters } from "./EmployeeDatabase";
 import { Employee, EmployeeT } from "./Employee";
@@ -27,8 +27,11 @@ export class EmployeeDatabaseDynamoDB implements EmployeeDatabase {
         }
         const employee = {
             id: id,
-            name: item["name"].S,
-            age: mapNullable(item["age"].N, value => parseInt(value, 10)),
+            name: item["name"]?.S || "",
+            age: mapNullable(item["age"]?.N, value => parseInt(value, 10)) || 0,
+            affiliation: item["affiliation"]?.S || "",
+            post: item["post"]?.S || "",
+            skills: item["skills"]?.SS || [],
         };
         const decoded = EmployeeT.decode(employee);
         if (isLeft(decoded)) {
@@ -48,20 +51,37 @@ export class EmployeeDatabaseDynamoDB implements EmployeeDatabase {
             return [];
         }
         return items
-            .filter(item => {
-                // 名前フィルタリング（後方互換性のため）
-                if (filters.name && filters.name !== "") {
-                    return item["name"].S?.toLowerCase().includes(filters.name.toLowerCase());
+            .map(item => {
+                return {
+                    id: item["id"]?.S || "",
+                    name: item["name"]?.S || "",
+                    age: mapNullable(item["age"]?.N, value => parseInt(value, 10)) || 0,
+                    affiliation: item["affiliation"]?.S || "",
+                    post: item["post"]?.S || "",
+                    skills: item["skills"]?.SS || [],
+                }
+            })
+            .filter(employee => {
+                // 各種フィルタリング
+                if (filters.name && filters.name !== "" && 
+                    !employee.name?.toLowerCase().includes(filters.name.toLowerCase())) {
+                    return false;
+                }
+                if (filters.affiliation && filters.affiliation !== "" && 
+                    employee.affiliation !== filters.affiliation) {
+                    return false;
+                }
+                if (filters.post && filters.post !== "" && 
+                    employee.post !== filters.post) {
+                    return false;
+                }
+                if (filters.skill && filters.skill !== "" && 
+                    !employee.skills?.includes(filters.skill)) {
+                    return false;
                 }
                 return true;
             })
-            .map(item => {
-                return {
-                    id: item["id"].S,
-                    name: item["name"].S,
-                    age: mapNullable(item["age"].N, value => parseInt(value, 10)),
-                }
-            }).flatMap(employee => {
+            .flatMap(employee => {
                 const decoded = EmployeeT.decode(employee);
                 if (isLeft(decoded)) {
                     console.error(`Employee ${employee.id} is missing some fields and skipped. ${JSON.stringify(employee)}`);
@@ -73,8 +93,30 @@ export class EmployeeDatabaseDynamoDB implements EmployeeDatabase {
     }
 
     async createEmployee(name: string, age: number, affiliation: string, post: string, skills: string[]): Promise<Employee> {
-        // 未実装のため、エラーを投げる
-        throw new Error("DynamoDB implementation not available yet. Please use EmployeeDatabaseInMemory for now.");
+        const id = Date.now().toString(); // 簡単なID生成
+        
+        const input = {
+            TableName: this.tableName,
+            Item: {
+                id: { S: id },
+                name: { S: name },
+                age: { N: age.toString() },
+                affiliation: { S: affiliation },
+                post: { S: post },
+                skills: { SS: skills },
+            },
+        };
+        
+        await this.client.send(new PutItemCommand(input));
+        
+        return {
+            id,
+            name,
+            age,
+            affiliation,
+            post,
+            skills,
+        };
     }
 
     async getFormOptions(): Promise<EmployeeFormOptions> {

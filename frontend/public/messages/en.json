@@ -1,0 +1,62 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "add": "Add",
+    "submit": "Submit",
+    "close": "Close"
+  },
+  "header": {
+    "title": "Talent Management System",
+    "employeeSearch": "Employee Search",
+    "employeeDetails": "Employee Details",
+    "toggleDarkMode": "Switch to Dark Mode",
+    "toggleLightMode": "Switch to Light Mode"
+  },
+  "employee": {
+    "name": "Name",
+    "age": "Age",
+    "affiliation": "Affiliation",
+    "post": "Position",
+    "skills": "Skills",
+    "basicInfo": "Basic Information",
+    "others": "Others",
+    "ageUnit": " years old",
+    "search": "Enter search keywords",
+    "listView": "List View",
+    "cardView": "Card View"
+  },
+  "addEmployee": {
+    "title": "Add Employee",
+    "adding": "Adding...",
+    "addEmployee": "Add Employee",
+    "namePlaceholder": "Enter employee name",
+    "agePlaceholder": "Enter age (1-100 years)",
+    "affiliationPlaceholder": "Select affiliation",
+    "postPlaceholder": "Select position",
+    "skillsPlaceholder": "Select skills",
+    "errors": {
+      "nameRequired": "Please enter a name",
+      "ageInvalid": "Age must be between 1 and 100 years",
+      "affiliationRequired": "Please select an affiliation",
+      "postRequired": "Please select a position",
+      "skillsRequired": "Please select at least one skill",
+      "addFailed": "Failed to add employee"
+    }
+  },
+  "filter": {
+    "selectAffiliation": "Select Affiliation",
+    "selectPost": "Select Position",
+    "selectSkill": "Select Skill"
+  },
+  "metadata": {
+    "title": "Talent Management System",
+    "description": "Simple Talent Management System",
+    "employeeSearchTitle": "Talent Management System - Employee Search"
+  }
+}

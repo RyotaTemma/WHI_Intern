@@ -3,14 +3,15 @@ import PersonIcon from "@mui/icons-material/Person";
 import { Avatar, Box, Card, CardContent, Typography } from "@mui/material";
 import { Employee } from "../models/Employee";
 import Link from "next/link";
+import { useTranslations } from '../hooks/useTranslations';
 
 export type EmployeeListItemProps = {
   employee: Employee;
   viewMode: "list" | "card";
 };
 
-export function EmployeeListItem(prop: EmployeeListItemProps) {
-  const { employee, viewMode } = prop;
+export function EmployeeListItem({ employee, viewMode }: EmployeeListItemProps) {
+  const t = useTranslations('employee');
 
   // リスト表示の場合
   if (viewMode === "list") {
@@ -41,13 +42,13 @@ export function EmployeeListItem(prop: EmployeeListItemProps) {
                   {employee.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {`所属: ${employee.affiliation}`}
+                  {`${t('affiliation')}: ${employee.affiliation}`}
                 </Typography>
               </Box>
               <Box>
                 <Typography variant="body2" color="text.secondary"
                   sx={{ whiteSpace: 'nowrap' }}>
-                  {`${employee.age}歳`}
+                  {`${employee.age}${t('ageUnit')}`}
                 </Typography>
               </Box>
             </Box>
@@ -96,7 +97,7 @@ export function EmployeeListItem(prop: EmployeeListItemProps) {
                   {`${employee.affiliation}`}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {`${employee.age}歳`}
+                  {`${employee.age}${t('ageUnit')}`}
                 </Typography>
               </Box>
             </Box>

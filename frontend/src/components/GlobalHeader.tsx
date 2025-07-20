@@ -7,20 +7,26 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "./ThemeProvider";
+import { useTranslations } from '../hooks/useTranslations';
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export interface GlobalHeaderProps {
   title: string;
 }
 
-const pageTitles: Record<string, string> = {
-  "/": "社員検索",
-  "/employee": "社員詳細",
-};
-
 export function GlobalHeader({ title }: GlobalHeaderProps) {
   const pathname = usePathname();
-  const currentPage = pageTitles[pathname] ?? pathname;
   const { mode, toggleTheme } = useTheme();
+  const t = useTranslations('header');
+
+  const pageTitles: Record<string, string> = {
+    "/": t('employeeSearch'),
+    "/employee": t('employeeDetails'),
+  };
+
+  // パスを正規化（末尾のスラッシュを除去）
+  const normalizedPath = pathname === "/" ? "/" : pathname.replace(/\/$/, "");
+  const currentPage = pageTitles[normalizedPath] ?? normalizedPath;
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -41,8 +47,11 @@ export function GlobalHeader({ title }: GlobalHeaderProps) {
             {currentPage}
           </Typography>
 
+          {/* 言語切り替えボタン */}
+          <LanguageSwitcher />
+
           {/* ダークモード切り替えボタン */}
-          <Tooltip title={mode === 'light' ? 'ダークモードに切り替え' : 'ライトモードに切り替え'}>
+          <Tooltip title={mode === 'light' ? t('toggleDarkMode') : t('toggleLightMode')}>
             <IconButton 
               color="inherit" 
               onClick={toggleTheme}

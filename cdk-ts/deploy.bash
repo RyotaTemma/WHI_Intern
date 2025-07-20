@@ -35,9 +35,10 @@ if [ "$DYNAMODB_ITEM_COUNT" -gt 0 ]; then
 else
     echo "Inserting initial data into DynamoDB."
     aws dynamodb put-item --table-name workshi-2025-tma-BackendDynamoDB \
-        --item '{"id":{"S":"1"},"name":{"S":"Jane Doe"},"age":{"N":"22"}}'
+        --item '{"id":{"S":"1"},"name":{"S":"Jane Doe"},"age":{"N":"22"},"affiliation":{"S":"Engineering"},"post":{"S":"Software Engineer"},"skills":{"SS":["JavaScript","React","TypeScript"]}}'
     aws dynamodb put-item --table-name workshi-2025-tma-BackendDynamoDB \
-        --item '{"id":{"S":"2"},"name":{"S":"John Smith"},"age":{"N":"28"}}'
+        --item '{"id":{"S":"2"},"name":{"S":"John Smith"},"age":{"N":"28"},"affiliation":{"S":"Marketing"},"post":{"S":"Marketing Manager"},"skills":{"SS":["Digital Marketing","Analytics","SEO"]}}'
     aws dynamodb put-item --table-name workshi-2025-tma-BackendDynamoDB \
-        --item '{"id":{"S":"3"},"name":{"S":"山田太郎"},"age":{"N":"27"}}'
+        --item '{"id":{"S":"3"},"name":{"S":"山田太郎"},"age":{"N":"27"},"affiliation":{"S":"Sales"},"post":{"S":"Sales Manager"},"skills":{"SS":["Sales Strategy","CRM","Negotiation"]}}'
 fi
+

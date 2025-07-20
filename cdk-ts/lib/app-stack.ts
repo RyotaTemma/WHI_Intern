@@ -55,13 +55,25 @@ export class AppStack extends cdk.Stack {
           origin: origins.FunctionUrlOrigin.withOriginAccessControl(
             backendFunction.addFunctionUrl({
               authType: lambda.FunctionUrlAuthType.AWS_IAM,
+              cors: {
+                allowCredentials: false,
+                allowedHeaders: ["*"],
+                allowedMethods: [lambda.HttpMethod.ALL],
+                allowedOrigins: ["*"],
+                maxAge: cdk.Duration.hours(1),
+              },
             })),
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
           originRequestPolicy: new cloudfront.OriginRequestPolicy(this, "OriginRequestPolicy", {
-            originRequestPolicyName: withPrefix("OriginRequestPolicy"),
+            originRequestPolicyName: withPrefix("OriginRequestPolicyV2"),
             queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior.all(),
+            headerBehavior: cloudfront.OriginRequestHeaderBehavior.allowList(
+              "Content-Type",
+              "Accept",
+              "Origin"
+            ),
           }),
         },
       },

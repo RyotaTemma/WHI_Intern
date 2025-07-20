@@ -9,6 +9,7 @@ import { EmployeeListItem } from "./EmployeeListItem";
 import { Employee, EmployeeT } from "../models/Employee";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import ViewListIcon from "@mui/icons-material/ViewList";
+import { useTranslations } from '../hooks/useTranslations';
 
 import { Box, IconButton, Tooltip, Stack, Divider, Grid } from "@mui/material";
 
@@ -49,6 +50,8 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const t = useTranslations('employee');
+    const tCommon = useTranslations('common');
 
     const getInitialViewMode = (): "list" | "card" => {
       const view = searchParams.get("view");
@@ -96,7 +99,7 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
     const ViewModeToggle = () => (
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <Stack direction="row" spacing={1} divider={<Divider orientation="vertical" flexItem />}>
-          <Tooltip title="リスト表示">
+          <Tooltip title={t('listView')}>
             <IconButton
               color={viewMode === "list" ? "primary" : "default"}
               onClick={() => handleViewModeChange("list")}
@@ -104,7 +107,7 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
               <ViewListIcon />
             </IconButton>
           </Tooltip>
-          <Tooltip title="カード表示">
+          <Tooltip title={t('cardView')}>
             <IconButton
               color={viewMode === "card" ? "primary" : "default"}
               onClick={() => handleViewModeChange("card")}
@@ -117,7 +120,7 @@ export const EmployeeListContainer = forwardRef<EmployeeListContainerRef, Employ
     );
 
     if (isLoading) {
-      return <p>Loading employees...</p>;
+      return <p>{tCommon('loading')}</p>;
     }
 
     if (data != null) {

@@ -2,16 +2,11 @@ import PersonIcon from "@mui/icons-material/Person";
 import { Avatar, Box, Paper, Tab, Tabs, Typography } from "@mui/material";
 import { Employee } from "../models/Employee";
 import { useCallback, useState } from "react";
+import { useTranslations } from '../hooks/useTranslations';
 
-const tabPanelValue = {
-  basicInfo: "基本情報",
-  Affiliation: "所属",
-  Post: "役職",
-  Skills: "スキル",
-  others: "その他",
-};
+// tabPanelValueは削除し、翻訳で対応
 
-type TabPanelValue = keyof typeof tabPanelValue;
+type TabPanelValue = "basicInfo" | "others";
 
 interface TabContentProps {
   value: TabPanelValue;
@@ -39,6 +34,7 @@ export function EmployeeDetails(prop: EmployeeDetailsProps) {
   const [selectedTabValue, setSelectedTabValue] =
     useState<TabPanelValue>("basicInfo");
   const employee = prop.employee;
+  const t = useTranslations('employee');
 
   const handleTabValueChange = useCallback(
     (event: React.SyntheticEvent, newValue: TabPanelValue) => {
@@ -81,24 +77,24 @@ export function EmployeeDetails(prop: EmployeeDetailsProps) {
         </Box>
         <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
           <Tabs value={selectedTabValue} onChange={handleTabValueChange}>
-            <Tab label={tabPanelValue.basicInfo} value={"basicInfo"} />
-            <Tab label={tabPanelValue.others} value={"others"} />
+            <Tab label={t('basicInfo')} value={"basicInfo"} />
+            <Tab label={t('others')} value={"others"} />
           </Tabs>
         </Box>
 
         <TabContent value={"basicInfo"} selectedValue={selectedTabValue}>
           <Box p={2} display="flex" flexDirection="column" gap={1}>
-            <Typography variant="h6">基本情報</Typography>
-            <Typography>年齢：{employee.age}歳</Typography>
-            <Typography>所属：{employee.affiliation}</Typography>
-            <Typography>役職：{employee.post}</Typography>
-            <Typography>スキル：{employee.skills.join(', ')}</Typography>
+            <Typography variant="h6">{t('basicInfo')}</Typography>
+            <Typography>{t('age')}：{employee.age}{t('ageUnit')}</Typography>
+            <Typography>{t('affiliation')}：{employee.affiliation}</Typography>
+            <Typography>{t('post')}：{employee.post}</Typography>
+            <Typography>{t('skills')}：{employee.skills.join(', ')}</Typography>
           </Box>
         </TabContent>
 
         <TabContent value={"others"} selectedValue={selectedTabValue}>
           <Box p={2} display="flex" flexDirection="column" gap={1}>
-            <Typography variant="h6">その他</Typography>
+            <Typography variant="h6">{t('others')}</Typography>
           </Box>
         </TabContent>
       </Box>

@@ -8,19 +8,43 @@ const getEmployeeHandler = async (database: EmployeeDatabase, id: string): Promi
     const employee: Employee | undefined = await database.getEmployee(id);
     if (employee == null) {
         console.log("A user is not found.");
-        return { statusCode: 404 };
+        return { 
+            statusCode: 404,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            },
+        };
     }
     return {
         statusCode: 200,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Content-Type': 'application/json',
+        },
         body: JSON.stringify(employee),
     };
 };
 
-const getEmployeesHandler = async (database: EmployeeDatabase, filterText: string): Promise<LambdaFunctionURLResult> => {
-    const filters: EmployeeFilters = { name: filterText };
+const getEmployeesHandler = async (database: EmployeeDatabase, query: any): Promise<LambdaFunctionURLResult> => {
+    const filters: EmployeeFilters = {
+        name: query?.name || query?.filterText || "", // 後方互換性のためfilterTextも保持
+        affiliation: query?.affiliation || "",
+        post: query?.post || "",
+        skill: query?.skill || "",
+    };
     const employees: Employee[] = await database.getEmployees(filters);
     return {
         statusCode: 200,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Content-Type': 'application/json',
+        },
         body: JSON.stringify(employees),
     };
 };
@@ -30,6 +54,12 @@ const getFormOptionsHandler = async (database: EmployeeDatabase): Promise<Lambda
     const options = await database.getFormOptions();
     return {
         statusCode: 200,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Content-Type': 'application/json',
+        },
         body: JSON.stringify(options),
     };
 };
@@ -42,6 +72,12 @@ const createEmployeeHandler = async (database: EmployeeDatabase, body: string): 
         if (!name || typeof name !== 'string' || !age || typeof age !== 'number') {
             return {
                 statusCode: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({ error: 'name (string) and age (number) are required' }),
             };
         }
@@ -49,6 +85,12 @@ const createEmployeeHandler = async (database: EmployeeDatabase, body: string): 
         if (!affiliation || typeof affiliation !== 'string') {
             return {
                 statusCode: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({ error: 'affiliation (string) is required' }),
             };
         }
@@ -56,6 +98,12 @@ const createEmployeeHandler = async (database: EmployeeDatabase, body: string): 
         if (!post || typeof post !== 'string') {
             return {
                 statusCode: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({ error: 'post (string) is required' }),
             };
         }
@@ -63,6 +111,12 @@ const createEmployeeHandler = async (database: EmployeeDatabase, body: string): 
         if (!skills || !Array.isArray(skills) || !skills.every(skill => typeof skill === 'string')) {
             return {
                 statusCode: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({ error: 'skills (array of strings) is required' }),
             };
         }
@@ -70,12 +124,24 @@ const createEmployeeHandler = async (database: EmployeeDatabase, body: string): 
         const newEmployee = await database.createEmployee(name, age, affiliation, post, skills);
         return {
             statusCode: 201,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(newEmployee),
         };
     } catch (error) {
         console.error('Error creating employee:', error);
         return {
             statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ error: 'Invalid request body' }),
         };
     }
@@ -83,6 +149,21 @@ const createEmployeeHandler = async (database: EmployeeDatabase, body: string): 
 
 export const handle = async (event: LambdaFunctionURLEvent): Promise<LambdaFunctionURLResult> => {
     console.log('event', event);
+    
+    // OPTIONSリクエストの処理（プリフライトリクエスト）
+    if (event.requestContext.http.method === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Max-Age': '86400',
+            },
+            body: '',
+        };
+    }
+    
     try {
         const tableName = process.env.EMPLOYEE_TABLE_NAME;
         if (tableName == null) {
@@ -98,33 +179,74 @@ export const handle = async (event: LambdaFunctionURLEvent): Promise<LambdaFunct
         // POSTとGETの分岐によるハンドラーの呼び出し
         if (path === "/api/employees") {
             if (method === "GET") {
-                return getEmployeesHandler(database, query?.filterText ?? "");
+                return getEmployeesHandler(database, query);
             } else if (method === "POST") {
                 return createEmployeeHandler(database, event.body ?? "");
             } else {
-                return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
+                return { 
+                    statusCode: 405, 
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ error: 'Method not allowed' }) 
+                };
             }
         } else if (path === "/api/form-options") {
             if (method === "GET") {
                 return getFormOptionsHandler(database);
             } else {
-                return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
+                return { 
+                    statusCode: 405, 
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ error: 'Method not allowed' }) 
+                };
             }
         } else if (path.startsWith("/api/employees/")) {
             const id = path.substring("/api/employees/".length);
             if (method === "GET") {
                 return getEmployeeHandler(database, id);
             } else {
-                return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
+                return { 
+                    statusCode: 405, 
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ error: 'Method not allowed' }) 
+                };
             }
         } else {
             console.log("Invalid path", path);
-            return { statusCode: 400 };
+            return { 
+                statusCode: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                    'Content-Type': 'application/json',
+                },
+            };
         }
     } catch (e) {
         console.error('Internal Server Error', e);
         return {
             statusCode: 500,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({
                 message: "Internal Server Error",
             }),

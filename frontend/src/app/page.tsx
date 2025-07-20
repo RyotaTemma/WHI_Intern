@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { SearchEmployees } from "../components/SearchEmployees";
 import { GlobalContainer } from "@/components/GlobalContainer";
+import { LoadingFallback } from "../components/LoadingFallback";
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <GlobalContainer>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<LoadingFallback />}>
         <SearchEmployees />
       </Suspense>
     </GlobalContainer>

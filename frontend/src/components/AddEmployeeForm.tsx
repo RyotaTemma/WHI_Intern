@@ -20,6 +20,7 @@ import { Employee } from "../models/Employee";
 import useSWR from "swr";
 import { isLeft } from "fp-ts/Either";
 import * as t from "io-ts";
+import { useTranslations } from '../hooks/useTranslations';
 
 // フォーム選択肢の型定義
 const FormOptionsT = t.type({
@@ -58,6 +59,10 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
+  const t = useTranslations('addEmployee');
+  const tCommon = useTranslations('common');
+  const tEmployee = useTranslations('employee');
+
   // フォーム選択肢データを取得（積極的キャッシュ設定）
   const { data: formOptions, error: fetchError } = useSWR<FormOptions, Error>(
     "/api/form-options",
@@ -79,7 +84,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
 
   useEffect(() => {
     if (fetchError) {
-      console.error("フォーム選択肢データの取得に失敗しました:", fetchError);
+      console.error("Failed to fetch form options:", fetchError);
     }
   }, [fetchError]);
 
@@ -87,28 +92,28 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
     e.preventDefault();
     
     if (!name.trim()) {
-      setError("名前を入力してください");
+      setError(t('errors.nameRequired'));
       return;
     }
     
     const ageNumber = parseInt(age, 10);
     if (isNaN(ageNumber) || ageNumber < 1 || ageNumber > 100) {
-      setError("年齢は1〜100歳の範囲で入力してください");
+      setError(t('errors.ageInvalid'));
       return;
     }
 
     if (!affiliation.trim()) {
-      setError("所属を選択してください");
+      setError(t('errors.affiliationRequired'));
       return;
     }
 
     if (!post.trim()) {
-      setError("役職を選択してください");
+      setError(t('errors.postRequired'));
       return;
     }
 
     if (skills.length === 0) {
-      setError("少なくとも1つのスキルを選択してください");
+      setError(t('errors.skillsRequired'));
       return;
     }
 
@@ -132,7 +137,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "従業員の追加に失敗しました");
+        throw new Error(errorData.error || t('errors.addFailed'));
       }
 
       const newEmployee: Employee = await response.json();
@@ -152,7 +157,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
       }
       
     } catch (err) {
-      setError(err instanceof Error ? err.message : "エラーが発生しました");
+      setError(err instanceof Error ? err.message : tCommon('error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -203,7 +208,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
         <Box display="flex" alignItems="center" gap={1}>
           <PersonAddIcon color="primary" />
           <Typography variant="h6" component="h2" fontWeight="bold">
-            従業員を追加
+            {t('title')}
           </Typography>
         </Box>
         
@@ -225,24 +230,24 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
           
           <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <TextField
-              label="名前"
+              label={tEmployee('name')}
               variant="outlined"
               fullWidth
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="従業員の名前を入力"
+              placeholder={t('namePlaceholder')}
               disabled={isSubmitting}
               required
             />
             
             <TextField
-              label="年齢"
+              label={tEmployee('age')}
               variant="outlined"
               type="number"
               fullWidth
               value={age}
               onChange={(e) => setAge(e.target.value)}
-              placeholder="年齢を入力（1〜100歳）"
+              placeholder={t('agePlaceholder')}
               disabled={isSubmitting}
               required
             />
@@ -253,11 +258,29 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
               onChange={(event, newValue) => {
                 setAffiliation(newValue || "");
               }}
+              slotProps={{
+                popper: {
+                  placement: "bottom-start",
+                  modifiers: [
+                    {
+                      name: 'flip',
+                      enabled: false,
+                    },
+                    {
+                      name: 'preventOverflow',
+                      options: {
+                        altBoundary: false,
+                        tether: false,
+                      },
+                    },
+                  ],
+                },
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="所属"
-                  placeholder="所属を選択"
+                  label={tEmployee('affiliation')}
+                  placeholder={t('affiliationPlaceholder')}
                   disabled={isSubmitting}
                 />
               )}
@@ -270,11 +293,29 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
               onChange={(event, newValue) => {
                 setPost(newValue || "");
               }}
+              slotProps={{
+                popper: {
+                  placement: "bottom-start",
+                  modifiers: [
+                    {
+                      name: 'flip',
+                      enabled: false,
+                    },
+                    {
+                      name: 'preventOverflow',
+                      options: {
+                        altBoundary: false,
+                        tether: false,
+                      },
+                    },
+                  ],
+                },
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="役職"
-                  placeholder="役職を選択"
+                  label={tEmployee('post')}
+                  placeholder={t('postPlaceholder')}
                   disabled={isSubmitting}
                 />
               )}
@@ -288,11 +329,29 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
               onChange={(event, newValue) => {
                 setSkills(newValue);
               }}
+              slotProps={{
+                popper: {
+                  placement: "bottom-start",
+                  modifiers: [
+                    {
+                      name: 'flip',
+                      enabled: false,
+                    },
+                    {
+                      name: 'preventOverflow',
+                      options: {
+                        altBoundary: false,
+                        tether: false,
+                      },
+                    },
+                  ],
+                },
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="スキル"
-                  placeholder="スキルを選択"
+                  label={tEmployee('skills')}
+                  placeholder={t('skillsPlaceholder')}
                   disabled={isSubmitting}
                 />
               )}
@@ -319,7 +378,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
                   textTransform: "none",
                 }}
               >
-                {isSubmitting ? "追加中..." : "従業員を追加"}
+                {isSubmitting ? t('adding') : t('addEmployee')}
               </Button>
               
               <Button
@@ -333,7 +392,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
                   textTransform: "none",
                 }}
               >
-                キャンセル
+                {tCommon('cancel')}
               </Button>
             </Box>
           </Box>
