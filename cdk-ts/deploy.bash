@@ -27,7 +27,7 @@ cd -
 
 echo "Deploying frontend."
 AWS_ACCOUNT=$(aws sts get-caller-identity | jq -r .Account)
-aws s3 cp --recursive "$PROJECT_ROOT_DIR/frontend/out" "s3://workshi-2025-tma-${AWS_ACCOUNT}/"
+aws s3 sync "$PROJECT_ROOT_DIR/frontend/out" s3://workshi-2025-tma-${AWS_ACCOUNT} --delete
 
 DYNAMODB_ITEM_COUNT=$(aws dynamodb scan --table-name workshi-2025-tma-BackendDynamoDB --max-items 1 | jq .Count)
 if [ "$DYNAMODB_ITEM_COUNT" -gt 0 ]; then
