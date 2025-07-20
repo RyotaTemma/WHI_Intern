@@ -9,24 +9,31 @@ const database = new EmployeeDatabaseInMemory();
 app.use(express.json());
 
 app.get("/api/employees", async (req: Request, res: Response) => {
-    const filterText = req.query.filterText ?? "";
-    // req.query is parsed by the qs module.
-    // https://www.npmjs.com/package/qs
-    if (Array.isArray(filterText)) {
-        // Multiple filterText is not supported
-        res.status(400).send();
+    // クエリから各フィルターパラメータを取得
+    const { name, affiliation, post, skill } = req.query;
+
+    // 各パラメータが配列でないことを確認
+    if (Array.isArray(name) || Array.isArray(affiliation) || Array.isArray(post) || Array.isArray(skill)) {
+        res.status(400).json({ error: "Filter parameters must not be arrays." });
         return;
     }
-    if (typeof filterText !== "string") {
-        // Nested query object is not supported
-        res.status(400).send();
-        return;
-    }
+
     try {
-        const employees = await database.getEmployees(filterText);
-        res.status(200).send(JSON.stringify(employees));
+        // データベースに渡すためのfiltersオブジェクトを構築
+        const filters = {
+            name: typeof name === 'string' ? name : undefined,
+            affiliation: typeof affiliation === 'string' ? affiliation : undefined,
+            post: typeof post === 'string' ? post : undefined,
+            skill: typeof skill === 'string' ? skill : undefined,
+        };
+
+        // 新しいgetEmployeesメソッドを呼び出し
+        const employees = await database.getEmployees(filters);
+
+        // res.json() を使って結果を返す
+        res.status(200).json(employees);
     } catch (e) {
-        console.error(`Failed to load the users filtered by ${filterText}.`, e);
+        console.error(`Failed to load employees with filters.`, e);
         res.status(500).send();
     }
 });

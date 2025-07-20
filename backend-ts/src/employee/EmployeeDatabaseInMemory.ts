@@ -1,8 +1,15 @@
 import { EmployeeDatabase } from "./EmployeeDatabase";
 import { Employee } from "./Employee";
 
-// 選択肢の型定義
-export interface EmployeeFormOptions {
+// getEmployeesの引数の型を定義
+interface EmployeeFilters {
+  name?: string;
+  affiliation?: string;
+  post?: string;
+  skill?: string;
+}
+
+ export interface EmployeeFormOptions {
     affiliations: string[];
     posts: string[];
     skills: string[];
@@ -83,22 +90,43 @@ export class EmployeeDatabaseInMemory implements EmployeeDatabase {
     constructor() {
         this.employees = new Map<string, Employee>();
         this.employees.set("1", { id: "1", name: "Jane Doe", age: 22, affiliation: "Engineering", post: "Software Engineer", skills: ["JavaScript", "TypeScript"] });
-        this.employees.set("2", { id: "2", name: "John Smith", age: 28, affiliation: "Engineering", post: "Software Engineer", skills: ["JavaScript", "TypeScript"] });
-        this.employees.set("3", { id: "3", name: "山田 太郎", age: 27, affiliation: "Engineering", post: "Software Engineer", skills: ["JavaScript", "TypeScript"] });
+        this.employees.set("2", { id: "2", name: "John Smith", age: 28, affiliation: "Design", post: "Graphic Designer", skills: ["Illustrator", "Print Design"] });
+        this.employees.set("3", { id: "3", name: "山田 太郎", age: 27, affiliation: "Marketing", post: "Marketing Manager", skills: ["Sales Strategy", "User Research"] });
     }
 
     async getEmployee(id: string): Promise<Employee | undefined> {
         return this.employees.get(id);
     }
 
-    async getEmployees(filterText: string): Promise<Employee[]> {
-        const employees = Array.from(this.employees.values());
-        if (filterText === "") {
-            return employees;
+    async getEmployees(filters: EmployeeFilters): Promise<Employee[]> {
+        let filteredEmployees = Array.from(this.employees.values());
+
+        // 名前での絞り込み
+        if (filters.name) {
+            filteredEmployees = filteredEmployees.filter(employee =>
+                employee.name.toLowerCase().includes(filters.name!.toLowerCase())
+            );
         }
-        return employees.filter(employee =>
-            employee.name.toLowerCase().includes(filterText.toLowerCase())
-        );
+        // 所属での絞り込み
+        if (filters.affiliation) {
+            filteredEmployees = filteredEmployees.filter(employee =>
+                employee.affiliation === filters.affiliation
+            );
+        }
+        // 役職での絞り込み
+        if (filters.post) {
+            filteredEmployees = filteredEmployees.filter(employee =>
+                employee.post === filters.post
+            );
+        }
+        // スキルでの絞り込み
+        if (filters.skill) {
+            filteredEmployees = filteredEmployees.filter(employee =>
+                employee.skills.includes(filters.skill!)
+            );
+        }
+
+        return filteredEmployees;
     }
 
     async createEmployee(name: string, age: number, affiliation: string, post: string, skills: string[]): Promise<Employee> {
