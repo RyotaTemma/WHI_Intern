@@ -31,6 +31,16 @@ app.get("/api/employees", async (req: Request, res: Response) => {
     }
 });
 
+app.get("/api/form-options", async (req: Request, res: Response) => {
+    try {
+        const options = await database.getFormOptions();
+        res.status(200).send(JSON.stringify(options));
+    } catch (e) {
+        console.error('Failed to load form options.', e);
+        res.status(500).send();
+    }
+});
+
 app.post("/api/employees", async (req: Request, res: Response) => {
     try {
         const { name, age, affiliation, post, skills } = req.body;

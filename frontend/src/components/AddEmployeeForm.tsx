@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Paper, 
   TextField, 
@@ -9,13 +9,41 @@ import {
   Alert,
   Divider,
   Collapse,
-  IconButton
+  IconButton,
+  Autocomplete,
+  Chip
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import { Employee } from "../models/Employee";
+import useSWR from "swr";
+import { isLeft } from "fp-ts/Either";
+import * as t from "io-ts";
+
+// フォーム選択肢の型定義
+const FormOptionsT = t.type({
+  affiliations: t.array(t.string),
+  posts: t.array(t.string),
+  skills: t.array(t.string),
+});
+
+type FormOptions = t.TypeOf<typeof FormOptionsT>;
+
+// フォーム選択肢データ取得用のfetcher
+const formOptionsFetcher = async (url: string): Promise<FormOptions> => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch form options at ${url}`);
+  }
+  const body = await response.json();
+  const decoded = FormOptionsT.decode(body);
+  if (isLeft(decoded)) {
+    throw new Error(`Failed to decode form options ${JSON.stringify(body)}`);
+  }
+  return decoded.right;
+};
 
 export type AddEmployeeFormProps = {
   onEmployeeAdded?: (employee: Employee) => void;
@@ -26,10 +54,35 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
   const [age, setAge] = useState("");
   const [affiliation, setAffiliation] = useState("");
   const [post, setPost] = useState("");
-  const [skills, setSkills] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  // フォーム選択肢データを取得（積極的キャッシュ設定）
+  const { data: formOptions, error: fetchError } = useSWR<FormOptions, Error>(
+    "/api/form-options",
+    formOptionsFetcher,
+    {
+      // 選択肢データは静的なので積極的にキャッシュ
+      revalidateOnFocus: false,        // フォーカス時の再検証を無効
+      revalidateOnReconnect: false,    // ネットワーク再接続時の再検証を無効
+      revalidateIfStale: false,        // staleでも再検証しない
+      dedupingInterval: 24 * 60 * 60 * 1000, // 24時間は重複リクエストを無効化
+      focusThrottleInterval: 60 * 60 * 1000,  // フォーカス時の再検証を1時間に制限
+    }
+  );
+
+  // 選択肢を取得
+  const affiliationOptions = formOptions?.affiliations || [];
+  const postOptions = formOptions?.posts || [];
+  const skillOptions = formOptions?.skills || [];
+
+  useEffect(() => {
+    if (fetchError) {
+      console.error("フォーム選択肢データの取得に失敗しました:", fetchError);
+    }
+  }, [fetchError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,24 +99,17 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
     }
 
     if (!affiliation.trim()) {
-      setError("所属を入力してください");
+      setError("所属を選択してください");
       return;
     }
 
     if (!post.trim()) {
-      setError("役職を入力してください");
+      setError("役職を選択してください");
       return;
     }
 
-    if (!skills.trim()) {
-      setError("スキルを入力してください");
-      return;
-    }
-
-    // スキルをカンマ区切りで分割し、空白を除去
-    const skillsArray = skills.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0);
-    if (skillsArray.length === 0) {
-      setError("少なくとも1つのスキルを入力してください");
+    if (skills.length === 0) {
+      setError("少なくとも1つのスキルを選択してください");
       return;
     }
 
@@ -81,7 +127,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
           age: ageNumber,
           affiliation: affiliation.trim(),
           post: post.trim(),
-          skills: skillsArray,
+          skills: skills,
         }),
       });
 
@@ -97,7 +143,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
       setAge("");
       setAffiliation("");
       setPost("");
-      setSkills("");
+      setSkills([]);
       setError(null);
       setIsFormOpen(false);
       
@@ -118,7 +164,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
     setAge("");
     setAffiliation("");
     setPost("");
-    setSkills("");
+    setSkills([]);
     setError(null);
     setIsFormOpen(false);
   };
@@ -202,37 +248,61 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
               required
             />
 
-            <TextField
-              label="所属"
-              variant="outlined"
-              fullWidth
-              value={affiliation}
-              onChange={(e) => setAffiliation(e.target.value)}
-              placeholder="従業員の所属を入力"
+            <Autocomplete
+              options={affiliationOptions}
+              value={affiliation || null}
+              onChange={(event, newValue) => {
+                setAffiliation(newValue || "");
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="所属"
+                  placeholder="所属を選択"
+                  disabled={isSubmitting}
+                />
+              )}
               disabled={isSubmitting}
-              required
             />
 
-            <TextField
-              label="役職"
-              variant="outlined"
-              fullWidth
-              value={post}
-              onChange={(e) => setPost(e.target.value)}
-              placeholder="従業員の役職を入力"
+            <Autocomplete
+              options={postOptions}
+              value={post || null}
+              onChange={(event, newValue) => {
+                setPost(newValue || "");
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="役職"
+                  placeholder="役職を選択"
+                  disabled={isSubmitting}
+                />
+              )}
               disabled={isSubmitting}
-              required
             />
 
-            <TextField
-              label="スキル"
-              variant="outlined"
-              fullWidth
+            <Autocomplete
+              multiple
+              options={skillOptions}
               value={skills}
-              onChange={(e) => setSkills(e.target.value)}
-              placeholder="従業員のスキルをカンマ区切りで入力"
+              onChange={(event, newValue) => {
+                setSkills(newValue);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="スキル"
+                  placeholder="スキルを選択"
+                  disabled={isSubmitting}
+                />
+              )}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip variant="outlined" label={option} {...getTagProps({ index })} key={index} />
+                ))
+              }
               disabled={isSubmitting}
-              required
             />
             
             {error && (

@@ -1,8 +1,84 @@
 import { EmployeeDatabase } from "./EmployeeDatabase";
 import { Employee } from "./Employee";
 
+// 選択肢の型定義
+export interface EmployeeFormOptions {
+    affiliations: string[];
+    posts: string[];
+    skills: string[];
+}
+
 export class EmployeeDatabaseInMemory implements EmployeeDatabase {
     private employees: Map<string, Employee>
+
+    // 事前定義された選択肢
+    private static readonly FORM_OPTIONS: EmployeeFormOptions = {
+        affiliations: [
+            "Engineering",
+            "Marketing", 
+            "Sales",
+            "Design",
+            "HR",
+            "Finance",
+            "Operations",
+            "Legal",
+            "Customer Support"
+        ],
+        posts: [
+            "Software Engineer",
+            "Senior Software Engineer", 
+            "Tech Lead",
+            "Engineering Manager",
+            "DevOps Engineer",
+            "Marketing Manager",
+            "Marketing Specialist",
+            "Sales Manager",
+            "Sales Representative",
+            "UI/UX Designer",
+            "Graphic Designer",
+            "Product Designer",
+            "HR Specialist",
+            "HR Manager",
+            "Financial Analyst",
+            "Accountant",
+            "Operations Manager",
+            "Legal Counsel",
+            "Customer Support Specialist"
+        ],
+        skills: [
+            "JavaScript",
+            "TypeScript", 
+            "React",
+            "Node.js",
+            "Python",
+            "Java",
+            "AWS",
+            "Docker",
+            "Kubernetes",
+            "Git",
+            "SQL",
+            "MongoDB",
+            "Figma",
+            "Photoshop",
+            "Illustrator",
+            "Digital Marketing",
+            "SEO",
+            "Analytics",
+            "Sales Strategy",
+            "CRM",
+            "Negotiation",
+            "Project Management",
+            "Agile",
+            "Scrum",
+            "User Research",
+            "Data Analysis",
+            "Excel",
+            "PowerPoint",
+            "Communication",
+            "Leadership",
+            "Problem Solving"
+        ]
+    };
 
     constructor() {
         this.employees = new Map<string, Employee>();
@@ -49,5 +125,10 @@ export class EmployeeDatabaseInMemory implements EmployeeDatabase {
     
         // 5) 生成した Employee を返す（Promise<Employee>)
         return newEmployee;
+    }
+
+    // 選択肢を取得するメソッド
+    async getFormOptions(): Promise<EmployeeFormOptions> {
+        return EmployeeDatabaseInMemory.FORM_OPTIONS;
     }
 }
