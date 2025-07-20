@@ -12,12 +12,10 @@ const compat = new FlatCompat({
 const eslintConfig = [
   {
     ignores: [
-      "**/node_modules/", 
-      ".next/", 
+      "**/node_modules/",
     ],
   },
-
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...compat.extends("plugin:@typescript-eslint/recommended"),
 ];
 
 export default eslintConfig;
