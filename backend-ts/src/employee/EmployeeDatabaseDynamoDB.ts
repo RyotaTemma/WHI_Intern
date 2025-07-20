@@ -1,6 +1,6 @@
 import { DynamoDBClient, GetItemCommand, GetItemCommandInput, ScanCommand, ScanCommandInput } from "@aws-sdk/client-dynamodb";
 import { isLeft } from "fp-ts/Either";
-import { EmployeeDatabase } from "./EmployeeDatabase";
+import { EmployeeDatabase, EmployeeFilters } from "./EmployeeDatabase";
 import { Employee, EmployeeT } from "./Employee";
 import { EmployeeFormOptions } from "./EmployeeDatabaseInMemory";
 
@@ -38,7 +38,7 @@ export class EmployeeDatabaseDynamoDB implements EmployeeDatabase {
         }
     }
 
-    async getEmployees(filterText: string): Promise<Employee[]> {
+    async getEmployees(filters: EmployeeFilters): Promise<Employee[]> {
         const input: ScanCommandInput  = {
             TableName: this.tableName,
         };
@@ -48,7 +48,13 @@ export class EmployeeDatabaseDynamoDB implements EmployeeDatabase {
             return [];
         }
         return items
-            .filter(item => filterText === "" || item["name"].S === filterText)
+            .filter(item => {
+                // 名前フィルタリング（後方互換性のため）
+                if (filters.name && filters.name !== "") {
+                    return item["name"].S?.toLowerCase().includes(filters.name.toLowerCase());
+                }
+                return true;
+            })
             .map(item => {
                 return {
                     id: item["id"].S,
