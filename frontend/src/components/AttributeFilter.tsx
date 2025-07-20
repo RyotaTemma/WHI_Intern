@@ -3,6 +3,8 @@
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Box from "@mui/material/Box";
 import { MenuItem } from "@mui/material";
+import { SortController } from "./SortController";
+import { SortKey, SortOrder } from "./SortController";
 
 // propsの型を定義
 interface AttributeFilterProps {
@@ -12,6 +14,10 @@ interface AttributeFilterProps {
   onAffiliationChange: (event: SelectChangeEvent<string>) => void;
   onPostChange: (event: SelectChangeEvent<string>) => void;
   onSkillChange: (event: SelectChangeEvent<string>) => void;
+  sortKey: SortKey;
+  sortOrder: SortOrder;
+  onSortKeyChange: (event: SelectChangeEvent<string>) => void;
+  onSortOrderChange: (event: SelectChangeEvent<string>) => void;
 }
 
 export function AttributeFilter ({
@@ -21,10 +27,23 @@ export function AttributeFilter ({
   onAffiliationChange,
   onPostChange,
   onSkillChange,
+  sortKey,
+  sortOrder,
+  onSortKeyChange,
+  onSortOrderChange,
 }: AttributeFilterProps) {
 
   return (
     <Box sx={{ display: 'flex', gap: 2 }}>
+
+      {/* SortControllerに受け取ったpropsを渡します */}
+      <SortController
+        sortKey={sortKey}
+        sortOrder={sortOrder}
+        onSortKeyChange={onSortKeyChange}
+        onSortOrderChange={onSortOrderChange}
+      />   
+      
       <Select value={affiliation} onChange={onAffiliationChange} displayEmpty fullWidth>
         <MenuItem value="">所属を選択</MenuItem>
         <MenuItem value="Engineering">Engineering</MenuItem>
