@@ -2,6 +2,7 @@ import { DynamoDBClient, GetItemCommand, GetItemCommandInput, ScanCommand, ScanC
 import { isLeft } from "fp-ts/Either";
 import { EmployeeDatabase } from "./EmployeeDatabase";
 import { Employee, EmployeeT } from "./Employee";
+import { EmployeeFormOptions } from "./EmployeeDatabaseInMemory";
 
 export class EmployeeDatabaseDynamoDB implements EmployeeDatabase {
     private client: DynamoDBClient;
@@ -68,6 +69,77 @@ export class EmployeeDatabaseDynamoDB implements EmployeeDatabase {
     async createEmployee(name: string, age: number, affiliation: string, post: string, skills: string[]): Promise<Employee> {
         // 未実装のため、エラーを投げる
         throw new Error("DynamoDB implementation not available yet. Please use EmployeeDatabaseInMemory for now.");
+    }
+
+    async getFormOptions(): Promise<EmployeeFormOptions> {
+        // DynamoDBでは未実装のため、InMemoryと同じ選択肢を返す
+        return {
+            affiliations: [
+                "Engineering",
+                "Marketing", 
+                "Sales",
+                "Design",
+                "HR",
+                "Finance",
+                "Operations",
+                "Legal",
+                "Customer Support"
+            ],
+            posts: [
+                "Software Engineer",
+                "Senior Software Engineer", 
+                "Tech Lead",
+                "Engineering Manager",
+                "DevOps Engineer",
+                "Marketing Manager",
+                "Marketing Specialist",
+                "Sales Manager",
+                "Sales Representative",
+                "UI/UX Designer",
+                "Graphic Designer",
+                "Product Designer",
+                "HR Specialist",
+                "HR Manager",
+                "Financial Analyst",
+                "Accountant",
+                "Operations Manager",
+                "Legal Counsel",
+                "Customer Support Specialist"
+            ],
+            skills: [
+                "JavaScript",
+                "TypeScript", 
+                "React",
+                "Node.js",
+                "Python",
+                "Java",
+                "AWS",
+                "Docker",
+                "Kubernetes",
+                "Git",
+                "SQL",
+                "MongoDB",
+                "Figma",
+                "Photoshop",
+                "Illustrator",
+                "Digital Marketing",
+                "SEO",
+                "Analytics",
+                "Sales Strategy",
+                "CRM",
+                "Negotiation",
+                "Project Management",
+                "Agile",
+                "Scrum",
+                "User Research",
+                "Data Analysis",
+                "Excel",
+                "PowerPoint",
+                "Communication",
+                "Leadership",
+                "Problem Solving"
+            ]
+        };
     }
 }
 

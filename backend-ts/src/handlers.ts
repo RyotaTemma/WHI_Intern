@@ -24,6 +24,15 @@ const getEmployeesHandler = async (database: EmployeeDatabase, filterText: strin
     };
 };
 
+// 選択肢を取得するハンドラー
+const getFormOptionsHandler = async (database: EmployeeDatabase): Promise<LambdaFunctionURLResult> => {
+    const options = await database.getFormOptions();
+    return {
+        statusCode: 200,
+        body: JSON.stringify(options),
+    };
+};
+
 const createEmployeeHandler = async (database: EmployeeDatabase, body: string): Promise<LambdaFunctionURLResult> => {
     try {
         const requestData = JSON.parse(body);
@@ -91,6 +100,12 @@ export const handle = async (event: LambdaFunctionURLEvent): Promise<LambdaFunct
                 return getEmployeesHandler(database, query?.filterText ?? "");
             } else if (method === "POST") {
                 return createEmployeeHandler(database, event.body ?? "");
+            } else {
+                return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
+            }
+        } else if (path === "/api/form-options") {
+            if (method === "GET") {
+                return getFormOptionsHandler(database);
             } else {
                 return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
             }
