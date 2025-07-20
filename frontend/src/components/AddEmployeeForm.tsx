@@ -192,11 +192,17 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
           alignItems: "center",
           justifyContent: "space-between",
           p: 2,
-          backgroundColor: isFormOpen ? "#e3f2fd" : "#fafafa",
+          backgroundColor: (theme) => 
+            isFormOpen 
+              ? theme.palette.mode === 'light' ? '#e3f2fd' : 'rgba(94, 194, 198, 0.08)'
+              : theme.palette.mode === 'light' ? '#fafafa' : 'rgba(255, 255, 255, 0.02)',
           cursor: "pointer",
           transition: "background-color 0.2s",
           "&:hover": {
-            backgroundColor: isFormOpen ? "#bbdefb" : "#f0f0f0",
+            backgroundColor: (theme) =>
+              isFormOpen
+                ? theme.palette.mode === 'light' ? '#bbdefb' : 'rgba(94, 194, 198, 0.12)'
+                : theme.palette.mode === 'light' ? '#f0f0f0' : 'rgba(255, 255, 255, 0.05)',
           },
         }}
         onClick={toggleForm}
@@ -221,7 +227,7 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
 
       {/* 折りたたみ式フォーム */}
       <Collapse in={isFormOpen}>
-        <Box sx={{ p: 3, pt: 2, backgroundColor: "white" }}>
+        <Box sx={{ p: 3, pt: 2, backgroundColor: 'background.paper' }}>
           <Divider sx={{ mb: 3 }} />
           
           <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -297,11 +303,6 @@ export function AddEmployeeForm({ onEmployeeAdded }: AddEmployeeFormProps) {
                   disabled={isSubmitting}
                 />
               )}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Chip variant="outlined" label={option} {...getTagProps({ index })} key={index} />
-                ))
-              }
               disabled={isSubmitting}
             />
             
