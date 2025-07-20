@@ -3,7 +3,7 @@ name: Deploy to AWS
 on:
   push:
     branches:
-      -  settingCD # ブランチにpushした場合に動作する
+      -  main # mainブランチにpushした場合に動作する
 jobs:
   deploy:
     runs-on: ubuntu-latest
